@@ -17,7 +17,7 @@ void DUMMY_CODE(Targs &&.../* unused */) {}
 using namespace std;
 
 StreamReassembler::StreamReassembler(const size_t capacity)
-    : _output(capacity), _capacity(capacity), _buffer(), _eof(numeric_limits<size_t>::max()) {}
+    : _output(capacity), _capacity(capacity), _buffer(capacity), _eof(numeric_limits<size_t>::max()) {}
 
 //! \details This function accepts a substring (aka a segment) of bytes,
 //! possibly out-of-order, from the logical stream, and assembles any newly
@@ -30,26 +30,26 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
         this->_eof = min(index + data.size(), this->_eof);
     }
 
-    for (size_t i = 0; i < data.size(); ++i) {
-        if (i + index < this->_start) {
+    size_t read_start = max(index, this->_start);
+    size_t read_end =
+        min(index + data.size(), min(this->_eof, this->_start + this->_capacity - this->_output.buffer_size()));
+
+    for (size_t i = read_start; i < read_end; ++i) {
+        auto &cur = this->_buffer[i % this->_capacity];
+        if (cur.second) {
             continue;
         }
-
-        auto exist = this->_buffer.find(i + index);
-        if (exist == this->_buffer.end()) {
-            this->_num_unassembled++;
-        }
-        this->_buffer[i + index] = data[i];
+        this->_num_unassembled++;
+        cur.first = data[i - index];
+        cur.second = true;
     }
 
-    auto iter = this->_buffer.find(this->_start);
-
-    while (this->_start < this->_eof && this->_output.remaining_capacity() > 0 && iter != this->_buffer.end()) {
-        this->_output.write(string(1, iter->second));
-        cout << "write <" << string(1, iter->second) << "> at: " << this->_start << endl;
-        cout << "remain capa2: " << this->_output.remaining_capacity() << endl;
-        --this->_num_unassembled;
-        iter = this->_buffer.find(++this->_start);
+    while (this->_start < this->_eof && this->_buffer[this->_start % this->_capacity].second) {
+        auto &cur = this->_buffer[this->_start % this->_capacity];
+        this->_output.write(string(1, cur.first));
+        cur.second = false;
+        this->_start++;
+        this->_num_unassembled--;
     }
 
     if (this->_start == this->_eof) {

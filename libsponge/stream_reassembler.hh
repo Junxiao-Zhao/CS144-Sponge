@@ -6,9 +6,8 @@ using namespace std;
 #include "byte_stream.hh"
 
 #include <cstdint>
-#include <map>
 #include <string>
-#include <unordered_map>
+#include <vector>
 
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 //! possibly overlapping) into an in-order byte stream.
@@ -16,12 +15,12 @@ class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
 
-    ByteStream _output;                     //!< The reassembled in-order byte stream
-    size_t _capacity;                       //!< The maximum number of bytes
-    unordered_map<uint64_t, char> _buffer;  //!< The buffer that stores the bytes
-    uint64_t _start{};                      //!< The index of the next byte to be inserted into the buffer
-    size_t _eof;                            //!< The index of the last byte in the entire stream
-    size_t _num_unassembled{};              //!< The number of bytes in the substrings stored but not yet reassembled
+    ByteStream _output;                //!< The reassembled in-order byte stream
+    size_t _capacity;                  //!< The maximum number of bytes
+    vector<pair<char, bool>> _buffer;  //!< The buffer that stores the bytes
+    uint64_t _start{};                 //!< The index of the next byte to be inserted into the buffer
+    size_t _eof;                       //!< The index of the last byte in the entire stream
+    size_t _num_unassembled{};         //!< The number of bytes in the substrings stored but not yet reassembled
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
