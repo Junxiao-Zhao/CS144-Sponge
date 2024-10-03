@@ -6,12 +6,12 @@ void Timer::track(TCPSegment &seg) {
     this->_running = true;
 }
 
-uint64_t Timer::remove_received(const WrappingInt32 ackno) {
+bool Timer::remove_received(const WrappingInt32 ackno) {
     uint64_t abs_ackno = unwrap(ackno, this->_isn, this->_nx_seqno);
 
     // Invalid ACK
     if (abs_ackno > this->_nx_seqno) {
-        return 0;
+        return false;
     }
 
     uint64_t ack_len = 0;
@@ -34,7 +34,7 @@ uint64_t Timer::remove_received(const WrappingInt32 ackno) {
     }
 
     this->_num_acked += ack_len;
-    return ack_len;
+    return true;
 }
 
 bool Timer::resend(const size_t ms_since_last_tick) {

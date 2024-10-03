@@ -67,9 +67,10 @@ void TCPSender::fill_window() {
 //! \param ackno The remote receiver's ackno (acknowledgment number)
 //! \param window_size The remote receiver's advertised window size
 void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
-    this->_window_size = window_size;
-    this->_timer.remove_received(ackno);
-    this->fill_window();
+    if (this->_timer.remove_received(ackno)) {
+        this->_window_size = window_size;
+        this->fill_window();
+    }
 }
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method

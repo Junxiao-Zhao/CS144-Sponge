@@ -33,7 +33,7 @@ class Timer {
     void track(TCPSegment &seg);
 
     //! \brief Remove segments that have been acknowledged.
-    uint64_t remove_received(const WrappingInt32 ackno);
+    bool remove_received(const WrappingInt32 ackno);
 
     //! \brief Indicate whether a segment should be resent.
     bool resend(const size_t ms_since_last_tick);
