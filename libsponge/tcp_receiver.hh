@@ -20,6 +20,9 @@ class TCPReceiver {
     //! The maximum number of bytes we'll store.
     size_t _capacity;
 
+    WrappingInt32 _isn{0};      //!< The initial sequence number of the remote sender
+    bool _isn_received{false};  //!< Whether we have received the ISN
+
   public:
     //! \brief Construct a TCP receiver
     //!

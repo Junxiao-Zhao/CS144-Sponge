@@ -4,6 +4,7 @@
 #include "byte_stream.hh"
 #include "tcp_config.hh"
 #include "tcp_segment.hh"
+#include "timer.hh"
 #include "wrapping_integers.hh"
 
 #include <functional>
@@ -31,6 +32,15 @@ class TCPSender {
 
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
+
+    //! the timer that keeps track of the outstanding segments
+    Timer _timer{_initial_retransmission_timeout, _isn};
+
+    //! the window size of the remote receiver
+    uint16_t _window_size{1};
+
+    //! flags indicating the state of the connection
+    bool _syn_sent{false}, _fin_sent{false};
 
   public:
     //! Initialize a TCPSender
