@@ -38,6 +38,14 @@ class AsyncNetworkInterface : public NetworkInterface {
     std::queue<InternetDatagram> &datagrams_out() { return _datagrams_out; }
 };
 
+
+struct RouterRow {
+    uint32_t route_prefix;
+    uint8_t prefix_length;
+    std::optional<Address> next_hop;
+    size_t interface_num;
+};
+
 //! \brief A router that has multiple network interfaces and
 //! performs longest-prefix-match routing between them.
 class Router {
@@ -48,6 +56,12 @@ class Router {
     //! as specified by the route with the longest prefix_length that matches the
     //! datagram's destination address.
     void route_one_datagram(InternetDatagram &dgram);
+
+    std::vector<RouterRow> _routes{};
+
+    RouterRow* longest_prefix_match(const uint32_t dest_ip);
+
+    static constexpr size_t MASK = 0xFFFFFFFF;
 
   public:
     //! Add an interface to the router
